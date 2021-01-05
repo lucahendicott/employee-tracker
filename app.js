@@ -83,7 +83,80 @@ const viewDeps = () => {
 }
 
 const addEmployee = () => {
-  
+  const query = "SELECT id, first_name, last_name FROM employee"
+  connection.query(query,
+    (err, allEmpData) => {
+      if (err) throw err
+      const queryTwo = "SELECT id, title FROM role"
+      connection.query(queryTwo, 
+        (err, allRoleData) => {
+          if (err) throw err
+          let empData = []
+          empData.push("No Manager")
+          allEmpData.forEach(item => {
+            empData.push(combineName(item.first_name, item.last_name))
+          });
+          let roleData = []
+          allRoleData.forEach(item => {
+            roleData.push(item.title)
+          })
+          inquirer.prompt([
+            {
+              name: "firstName",
+              type: "input",
+              message: "Enter employee's first name:",
+            },
+            {
+              name: "lastName",
+              type: "input",
+              message: "Enter employee's last name:",
+            },
+            {
+              name: "chooseRole",
+              type: "list",
+              message: "Choose employee's role:",
+              choices: roleData,
+            },
+            {
+              name: "chooseManager",
+              type: "list",
+              message: "Choose employee's manager:",
+              choices: empData,
+            },
+          ])
+          .then(({ firstName, lastName, chooseRole, chooseManager }) => {
+            let managerID
+            allEmpData.forEach(item => {
+              if(chooseManager === combineName(item.first_name, item.last_name)){
+                managerID = item.id
+              }
+            });
+            let roleID
+            allRoleData.forEach(item => {
+              if(chooseRole === item.title){
+                roleID = item.id
+              }
+            });
+            const insertQuery = "INSERT INTO employee SET ?"
+            connection.query(insertQuery, {
+              first_name: firstName, 
+              last_name: lastName, 
+              role_id: roleID, 
+              manager_id: managerID },
+              (err, data) => {
+                if(err) throw err
+                startMenu()
+              }
+            )
+          })
+        }
+      )
+    }
+  )
+}
+
+const combineName = (firstName, lastName) => {
+    return `${lastName}, ${firstName}`
 }
 
 const addRole = () => {
@@ -91,7 +164,6 @@ const addRole = () => {
   connection.query(query,
     (err, data) => {
       if (err) throw err
-      console.log(data)
       let depNames = []
       data.forEach(item => {
         depNames.push(item.name) 
@@ -115,16 +187,21 @@ const addRole = () => {
         }
       ])
       .then(({ addRole, addSalary, getDep }) => {
+        let depID
+        data.forEach(item => {
+          if(getDep === item.name){
+            depID = item.id
+          }
+        });
         const query = "INSERT INTO role SET ?"
-        connection.query(query, {title: addRole, salary: addSalary},
-        (err, data) => {
+        connection.query(query, {title: addRole, salary: addSalary, department_id: depID},
+        (err, res) => {
           if (err) throw err
           startMenu()
         })
       })
     }
   )
-  
 }
 
 const addDep = () => {
@@ -132,30 +209,17 @@ const addDep = () => {
     name:"addDep",
     type:"input",
     message:"Which department would you like add?",
-}).then(({ addDep }) => {
+})
+.then(({ addDep }) => {
   const query = 
   "INSERT INTO department SET ?"
-connection.query(query, {name: addDep},
+  connection.query(query, {name: addDep},
   (err, data) => {
     if (err) throw err
     startMenu()
 })
 })
 }
-
-const getDepInfo = () => {
-  const query = "SELECT id, name FROM department"
-  connection.query(query,
-    (err, data) => {
-      if (err) throw err
-      let depNames = []
-      data.forEach(item => {
-        depNames.push(item.name) 
-      });
-    }
-  )
-}
-
 
 // Connect to the DB
 connection.connect((err) => {
