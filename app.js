@@ -16,9 +16,9 @@ const startMenu = () => {
         type:"list",
         message:"What would you like to do?",
         choices:[
-        'View employees', 
-        'View roles', 
-        'View departments',
+        'View all employees', 
+        'View all roles', 
+        'View all departments',
         'Add an employee', 
         'Add a role', 
         'Add a department',
@@ -27,13 +27,13 @@ const startMenu = () => {
     })
     .then(({ choiceList }) => {
       switch (choiceList) {
-          case 'View employees':
+          case 'View all employees':
               viewEmployee()
               break;
-          case 'View roles':
+          case 'View all roles':
               viewRoles()
               break;
-          case 'View departments':
+          case 'View all departments':
               viewDeps()
               break;
           case 'Add an employee':
@@ -83,15 +83,77 @@ const viewDeps = () => {
 }
 
 const addEmployee = () => {
-
+  
 }
 
 const addRole = () => {
+  const query = "SELECT id, name FROM department"
+  connection.query(query,
+    (err, data) => {
+      if (err) throw err
+      console.log(data)
+      let depNames = []
+      data.forEach(item => {
+        depNames.push(item.name) 
+      });
+      inquirer.prompt([
+        {
+        name:"addRole",
+        type:"input",
+        message:"Which role would you like add?",
+        },
+        {
+        name:"addSalary",
+        type:"input",
+        message:"Enter the Salary for this role.",
+        },
+        {
+        name: "getDep",
+        type: "list",
+        message: "Select department.",
+        choices: depNames,
+        }
+      ])
+      .then(({ addRole, addSalary, getDep }) => {
+        const query = "INSERT INTO role SET ?"
+        connection.query(query, {title: addRole, salary: addSalary},
+        (err, data) => {
+          if (err) throw err
+          startMenu()
+        })
+      })
+    }
+  )
   
 }
 
 const addDep = () => {
-  
+  inquirer.prompt({
+    name:"addDep",
+    type:"input",
+    message:"Which department would you like add?",
+}).then(({ addDep }) => {
+  const query = 
+  "INSERT INTO department SET ?"
+connection.query(query, {name: addDep},
+  (err, data) => {
+    if (err) throw err
+    startMenu()
+})
+})
+}
+
+const getDepInfo = () => {
+  const query = "SELECT id, name FROM department"
+  connection.query(query,
+    (err, data) => {
+      if (err) throw err
+      let depNames = []
+      data.forEach(item => {
+        depNames.push(item.name) 
+      });
+    }
+  )
 }
 
 
