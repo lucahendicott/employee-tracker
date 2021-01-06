@@ -22,7 +22,8 @@ const startMenu = () => {
         'Add an employee', 
         'Add a role', 
         'Add a department',
-        "exit"
+        'Update an employee role',
+        'exit'
         ]
     })
     .then(({ choiceList }) => {
@@ -41,6 +42,9 @@ const startMenu = () => {
               break;
           case 'Add a role':
               addRole()
+              break;
+          case 'Update an employee role':
+              updateRole()
               break;
           case 'Add a department':
               addDep()
@@ -159,6 +163,63 @@ const combineName = (firstName, lastName) => {
     return `${lastName}, ${firstName}`
 }
 
+const updateRole = () => {
+  const queryOne = "SELECT id, first_name, last_name FROM employee"
+    connection.query(queryOne,
+      (err, allEmpData) => {
+      if (err) throw err
+        const query = "SELECT id, title FROM role"
+          connection.query(query,
+            (err, data) => {
+            if (err) throw err
+            let allRoles = []
+              data.forEach(item => {
+              allRoles.push(item.title)
+              })
+              let employees = []
+              allEmpData.forEach(item => {
+                employees.push(combineName(item.first_name, item.last_name))
+              })
+                inquirer.prompt([
+                  {
+                  name: "roleChoices",
+                  type: "list",
+                  message: "Select new role:",
+                  choices: allRoles,
+                  },
+                  {
+                  name: "empChoices",
+                  type: "list",
+                  message: "Select employee to update:",
+                  choices: employees,
+                  },
+                ])
+              .then(({ roleChoices, empChoices }) => {
+                let roleID
+                data.forEach(item => {
+                if(roleChoices === item.title){
+                roleID = item.id
+                }
+                });
+                let empID
+                allEmpData.forEach(item => {
+                if(empChoices === combineName(item.first_name, item.last_name)){
+                empID = item.id
+                }
+                });
+                const query = "UPDATE employee SET role_id = ? WHERE id = ?"
+                connection.query(query, [roleID, empID],
+                  (err, res) => {
+                  if (err) throw err
+                  startMenu()
+                  })
+              })
+            }
+          )
+      }
+  )
+}
+
 const addRole = () => {
   const query = "SELECT id, name FROM department"
   connection.query(query,
@@ -209,16 +270,16 @@ const addDep = () => {
     name:"addDep",
     type:"input",
     message:"Which department would you like add?",
-})
-.then(({ addDep }) => {
+  })
+  .then(({ addDep }) => {
   const query = 
   "INSERT INTO department SET ?"
   connection.query(query, {name: addDep},
-  (err, data) => {
+    (err, data) => {
     if (err) throw err
     startMenu()
-})
-})
+    })
+  })
 }
 
 // Connect to the DB
