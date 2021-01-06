@@ -19,11 +19,11 @@ Alongside the mysql database, this app is running with JavaScript. The app.js fi
 
 ![Usage Gif](assets/images/employee-tracker-vid.gif)
 
+[Link to Usage Video](https://drive.google.com/file/d/1adl-psBK1f430o9ELQyOSb24opGNHudo/view?usp=sharing)
+
 The database uses 3 tables. The department table connects to the role table ..and the role table connects to the employee table. Each table is using foreign keys to reference id's from the other tables. This is ultimately how we can connect and refernece certain tables accordingly when adding/ updating all company info.
 
 ![database tables](assets/images/database-tables.jpg)
-
-[Link to Usage Video](https://drive.google.com/file/d/1adl-psBK1f430o9ELQyOSb24opGNHudo/view?usp=sharing)
 
 ## Credits  
 [mysql query help](https://www.tutorialspoint.com/mysql/mysql-update-query.htm)
