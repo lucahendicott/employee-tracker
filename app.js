@@ -58,7 +58,7 @@ const startMenu = () => {
 
 const viewEmployee = () => {
   const query = 
-    "SELECT * FROM employee"
+    "SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(e.first_name, ' ' ,e.last_name) AS Manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;"
     connection.query(query, (err, res) => {
       if (err) throw err;
       console.table(res)
@@ -68,7 +68,7 @@ const viewEmployee = () => {
 
 const viewRoles = () => {
   const query = 
-    "SELECT * FROM role"
+  "SELECT employee.first_name, employee.last_name, role.title AS Title FROM employee JOIN role ON employee.role_id = role.id;"
     connection.query(query, (err, res) => {
       if (err) throw err;
       console.table(res)
@@ -78,7 +78,7 @@ const viewRoles = () => {
 
 const viewDeps = () => {
   const query = 
-    "SELECT * FROM department"
+  "SELECT employee.first_name, employee.last_name, department.name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;"
     connection.query(query, (err, res) => {
       if (err) throw err;
       console.table(res)
