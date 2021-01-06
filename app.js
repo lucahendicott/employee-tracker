@@ -6,10 +6,11 @@ const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
     user: 'root',
-    password: 'password',
+    password: '',
     database: 'emptracker_db',
 });
 
+// start menu function prompting user to choose what they owuld like to do
 const startMenu = () => {
     inquirer.prompt({
         name:"choiceList",
@@ -26,6 +27,7 @@ const startMenu = () => {
         'exit'
         ]
     })
+    // Add all options to switch case with corresponding functions
     .then(({ choiceList }) => {
       switch (choiceList) {
           case 'View all employees':
@@ -56,6 +58,7 @@ const startMenu = () => {
     })
 }
 
+//function to show all employees and their corresponding info with console.table
 const viewEmployee = () => {
   const query = 
     "SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(e.first_name, ' ' ,e.last_name) AS Manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;"
@@ -86,6 +89,8 @@ const viewDeps = () => {
     });
 }
 
+
+//add employee function that querys user response for first and last name into database
 const addEmployee = () => {
   const query = "SELECT id, first_name, last_name FROM employee"
   connection.query(query,
@@ -95,6 +100,7 @@ const addEmployee = () => {
       connection.query(queryTwo, 
         (err, allRoleData) => {
           if (err) throw err
+          //looping over any employee and role data entered by user to offer those as options for an employee's role and manger
           let empData = []
           empData.push("No Manager")
           allEmpData.forEach(item => {
@@ -128,6 +134,7 @@ const addEmployee = () => {
               choices: empData,
             },
           ])
+          //setting the manager and role id's for each employee and role
           .then(({ firstName, lastName, chooseRole, chooseManager }) => {
             let managerID
             allEmpData.forEach(item => {
@@ -159,10 +166,12 @@ const addEmployee = () => {
   )
 }
 
+//function to show employees in table by last name first
 const combineName = (firstName, lastName) => {
     return `${lastName}, ${firstName}`
 }
 
+//
 const updateRole = () => {
   const queryOne = "SELECT id, first_name, last_name FROM employee"
     connection.query(queryOne,
@@ -247,6 +256,7 @@ const addRole = () => {
         choices: depNames,
         }
       ])
+      // setting department id
       .then(({ addRole, addSalary, getDep }) => {
         let depID
         data.forEach(item => {
